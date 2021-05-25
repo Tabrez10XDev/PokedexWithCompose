@@ -1,8 +1,8 @@
 package com.lj.pokedexwithcompose.ui.pokemondetail
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
@@ -24,14 +24,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltNavGraphViewModel
 import androidx.navigation.NavController
 import com.google.accompanist.coil.CoilImage
 import com.lj.pokedexwithcompose.data.remote.responses.Pokemon
+import com.lj.pokedexwithcompose.data.remote.responses.Type
 import com.lj.pokedexwithcompose.util.Resource
 import com.lj.pokedexwithcompose.util.Status
+import java.util.*
 
 @Composable
 fun PokemonDetailScreen(
@@ -64,7 +68,7 @@ fun PokemonDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    top = topPadding + pokemonImageSize/2f,
+                    top = topPadding + pokemonImageSize / 2f,
                     start = 16.dp,
                     end = 16.dp, bottom =
                     16.dp
@@ -78,7 +82,7 @@ fun PokemonDetailScreen(
                 .size(100.dp)
                 .align(Center)
                 .padding(
-                    top = topPadding + pokemonImageSize/2f,
+                    top = topPadding + pokemonImageSize / 2f,
                     start = 16.dp,
                     end = 16.dp, bottom =
                     16.dp
@@ -160,6 +164,52 @@ fun PokemonDetailStateWrapper(
                color = Color.Red,
                modifier = modifier
             )
+        }
+    }
+}
+
+@Composable
+fun PokemonDetailSection(
+    pokemonInfo: Pokemon,
+    modifier: Modifier = Modifier
+) {
+    val scrollState = rememberScrollState()
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .offset(y = 100.dp)
+            .verticalScroll(scrollState)
+
+    ){
+        Text(
+            text = "${pokemonInfo.id} ${pokemonInfo.name.capitalize(Locale.ROOT)}",
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colors.onSurface
+        )
+    }
+}
+
+@Composable
+fun PokemonTypeSection(
+    types: List<Type>
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .padding(16.dp)
+    ){
+        for(type in types){
+            Box(
+                contentAlignment = Center,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(8.dp)
+                    .clip(CircleShape)
+            ){
+
+            }
         }
     }
 }
