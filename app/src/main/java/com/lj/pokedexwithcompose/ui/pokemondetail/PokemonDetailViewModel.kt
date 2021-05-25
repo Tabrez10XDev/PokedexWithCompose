@@ -1,4 +1,19 @@
 package com.lj.pokedexwithcompose.ui.pokemondetail
 
-class PokemonDetailViewModel {
+import androidx.lifecycle.ViewModel
+import com.lj.pokedexwithcompose.data.remote.responses.Pokemon
+import com.lj.pokedexwithcompose.repositories.PokemonRepository
+import com.lj.pokedexwithcompose.util.Resource
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+
+@HiltViewModel
+class PokemonDetailViewModel @Inject constructor(
+    private val repository: PokemonRepository
+) : ViewModel() {
+
+    suspend fun getPokemonInfo(pokemonName : String) : Resource<Pokemon>{
+        return repository.getPokemonInfo(pokemonName)
+    }
+
 }
