@@ -1,5 +1,7 @@
 package com.lj.pokedexwithcompose.ui.pokemondetail
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -11,31 +13,38 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.Center
-import androidx.compose.ui.Alignment.Companion.Top
 import androidx.compose.ui.Alignment.Companion.TopCenter
-import androidx.compose.ui.Alignment.Companion.TopEnd
-import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltNavGraphViewModel
 import androidx.navigation.NavController
 import com.google.accompanist.coil.CoilImage
+import com.lj.pokedexwithcompose.R
 import com.lj.pokedexwithcompose.data.remote.responses.Pokemon
 import com.lj.pokedexwithcompose.data.remote.responses.Type
 import com.lj.pokedexwithcompose.util.Resource
 import com.lj.pokedexwithcompose.util.Status
+import com.lj.pokedexwithcompose.util.parseTypeToColor
+import java.lang.Math.round
 import java.util.*
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 @Composable
 fun PokemonDetailScreen(
@@ -150,7 +159,11 @@ fun PokemonDetailStateWrapper(
 ){
     when(pokemonInfo.status){
         Status.SUCCESS->{
-
+            PokemonDetailSection(
+                pokemonInfo = pokemonInfo.data!!,
+                modifier = Modifier
+                    .offset(y = (-20).dp)
+            )
         }
         Status.LOADING->{
             CircularProgressIndicator(
@@ -184,10 +197,14 @@ fun PokemonDetailSection(
     ){
         Text(
             text = "${pokemonInfo.id} ${pokemonInfo.name.capitalize(Locale.ROOT)}",
+            fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colors.onSurface
+            color = MaterialTheme.colors.onSurface,
+
         )
+        PokemonTypeSection(types = pokemonInfo.types)
+        PokemonDetailDataSection(pokemonWeight = pokemonInfo.weight, pokemonHeight = pokemonInfo.height )
     }
 }
 
@@ -207,9 +224,127 @@ fun PokemonTypeSection(
                     .weight(1f)
                     .padding(8.dp)
                     .clip(CircleShape)
+                    .background(parseTypeToColor(type))
+                    .height(35.dp)
             ){
-
+                Text(
+                    text = type.type.name,
+                    color = Color.White,
+                    fontSize = 18.sp
+                )
             }
         }
     }
+}
+
+
+@Composable
+fun PokemonDetailDataSection(
+    pokemonWeight: Int,
+    pokemonHeight: Int,
+    sectionHeight: Dp = 80.dp
+){
+    val pokemonWeightInKg = remember{
+        pokemonWeight / 10f
+    }
+
+    val pokemonHeightInMeters = remember{
+        round(pokemonHeight * 100f) / 1000f
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+    ){
+        PokemonDetailDataItem(
+            dataValue = pokemonWeightInKg,
+            dataUnit = "kg",
+            dataIcon = painterResource(id = R.drawable.ic_weight),
+            modifier = Modifier
+                .weight(1f)
+        )
+        Spacer(
+            modifier = Modifier
+                .size(1.dp, sectionHeight)
+                .background(Color.LightGray)
+        )
+        PokemonDetailDataItem(
+            dataValue = pokemonHeightInMeters,
+            dataUnit = "m",
+            dataIcon = painterResource(id = R.drawable.ic_height),
+            modifier = Modifier
+                .weight(1f)
+        )
+
+    }
+
+
+}
+
+@Composable
+fun PokemonDetailDataItem(
+    dataValue: Float,
+    dataUnit: String,
+    dataIcon: Painter,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ){
+        Icon(painter = dataIcon, contentDescription = null, tint = MaterialTheme.colors.onSurface)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "${dataValue}${dataUnit}",
+            color = MaterialTheme.colors.onSurface
+        )
+    }
+}
+
+@Composable
+fun PokemonStat(
+    statName: String,
+    statValue: Int,
+    statMaxValue: Int,
+    statColour: Color,
+    height: Dp = 28.dp,
+    animDuration: Int = 1000,
+    animDelay: Int = 0
+){
+    var animationPlayed by remember{
+        mutableStateOf(false)
+    }
+
+    val currPercent = animateFloatAsState(
+        targetValue = if(animationPlayed){
+            statValue / statMaxValue.toFloat()
+        }else{
+            0f
+        },
+        animationSpec = tween(
+            animDuration,
+            animDelay
+        )
+    )
+
+    LaunchedEffect(key1 = true){
+        animationPlayed = true
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height = height)
+            .clip(CircleShape)
+            .background(
+                if(isSystemInDarkTheme()){
+                    Color(0xFF505050)
+                }else{
+                    Color.LightGray
+                }
+            )
+    ){
+
+    }
+
 }
